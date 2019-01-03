@@ -70,7 +70,7 @@ public class MyUI extends UI {
         // addWindow(subWindow);
     	
     	/* TABLE */
-    	//grid.addColumn(propertyName)
+    	//grid.addColumn(propertyName)tt
      
         //informationCell.setText("Basic Information");
         //grid.addHeaderRowAt(getTabIndex()).setStyleName("Productos Basicos");
