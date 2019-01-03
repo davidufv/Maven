@@ -1,5 +1,8 @@
 package com.inventario.vaadin_inventario;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import javax.servlet.annotation.WebServlet;
 
 
@@ -9,6 +12,7 @@ import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -19,6 +23,8 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Grid.SelectionMode;
+
+
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window 
@@ -35,22 +41,54 @@ public class MyUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
     	
-
+    	FormLayout formLayout = new FormLayout();
+    	TextField textFieldNombre = new TextField("Nombre");
+    	TextField textFieldCantidad = new TextField("Cantidad" );
+    	TextField textFieldVenta = new TextField("Precio Venta");    	
+    	TextField textFieldCompra = new TextField("Precio Compra");
+    	TextField textFieldFabricacion = new TextField("Precio Fabricación " );
+    	CheckBoxGroup<String> multi =
+    		    new CheckBoxGroup<>("Seleccion Componentes");
     	
+    		//multi.setItems("Nom", "Muchos", "Monta");
+    	Iterator<Producto> it = ListaProductos.getInstance().getLista_productos().iterator();
+    	ArrayList<String> nombres = new ArrayList<String>() ;
+		while (it.hasNext()) {
+				nombres.add(it.next().getNombre());
+			}
+    	multi.setItems(nombres);
+    	
+ 
+    	//TextField textFieldType = new TextField("Tipo");
+    	Button buttonAddProc = new Button("Añadir/Editar");
+    	//String cantidad = Integer.toString(textFieldCantidad.getValue());
     	Grid<Producto> grid = new Grid<Producto>();
     	HorizontalLayout horizontalLayout = new HorizontalLayout();	
+     	formLayout.addComponents(
+    			textFieldNombre, 
+    			textFieldCantidad, 
+    			textFieldVenta,
+    			textFieldCompra,
+    			textFieldFabricacion,
+    			multi,
+    			buttonAddProc
+    			
+    			
+    	);
+    	horizontalLayout.addComponents(grid, formLayout);
+    	setContent(horizontalLayout);
     	/* VENTANA DETALLE */
     	
     	Window subWindow = new Window("Detalles Producto");
     	
         VerticalLayout subContent = new VerticalLayout();
-        subWindow.setHeight("200px");
-        subWindow.setWidth("400px");
+        subWindow.setHeight("400px");
+        subWindow.setWidth("300px");
         Label labelNumber = new Label();
         Label labelName = new Label();
         Label labelType = new Label();
         Button buttonDelete = new Button("Borrar Producto");
-       // Button buttonEdit = new Button("Editar Mueble");
+        Button buttonEdit = new Button("Editar Producto");
         
         buttonDelete.addClickListener(e -> {
         	ListaProductos.getInstance().getLista_productos().remove(selectedProducto);
@@ -59,9 +97,41 @@ public class MyUI extends UI {
         	removeWindow(subWindow);
         });
         
+        
+        buttonEdit.addClickListener(e -> {
+        	grid.setItems(ListaProductos.getInstance().getLista_productos());
+        	//grid.setItems(Pokedex.getInstance().getPokemons());
+    		textFieldNombre.clear();
+    		textFieldCantidad.clear();
+    		textFieldVenta.clear();
+			textFieldCompra.clear();
+			textFieldFabricacion.clear();
+			
+			textFieldNombre.setValue(selectedProducto.getNombre());
+    		textFieldCantidad.setValue(selectedProducto.getCantidad().toString());
+    		textFieldVenta.setValue(selectedProducto.getPrecioVenta().toString());
+			textFieldCompra.setValue(selectedProducto.getPrecioCompra().toString());
+			textFieldFabricacion.setValue(selectedProducto.getPrecioFabricacion().toString());
+			
+	    	formLayout.addComponents(
+	    			textFieldNombre, 
+	    			textFieldCantidad, 
+	    			textFieldVenta,
+	    			textFieldCompra,
+	    			textFieldFabricacion,
+	    			buttonAddProc
+	    			
+	    	);
+	    	
+	    	horizontalLayout.addComponents(grid, formLayout);
+	    	setContent(horizontalLayout);
+        	
+        	
+        	removeWindow(subWindow);
+        });
    
               
-        subContent.addComponents(labelNumber, labelName, labelType, buttonDelete);       
+        subContent.addComponents(labelNumber, labelName, labelType, buttonDelete,buttonEdit);       
         subWindow.center();
         subWindow.setContent(subContent);
         
@@ -77,6 +147,9 @@ public class MyUI extends UI {
      //   grid.addColumn(Producto::getNombre).seth
     	grid.addColumn(Producto::getNombre).setCaption("Nombre");
     	grid.addColumn(Producto::getCantidad).setCaption("Cantidad");
+    	grid.addColumn(Producto::getPrecioCompra).setCaption("Compra");
+    	grid.addColumn(Producto::getPrecioVenta).setCaption("Venta");
+    	grid.addColumn(Producto::getPrecioFabricacion).setCaption("Fabricacion");
     	//grid.addColumn(Mueble::getTipo).setCaption("Tipo");
     	grid.setSelectionMode(SelectionMode.SINGLE);
     	
@@ -86,8 +159,11 @@ public class MyUI extends UI {
     		
         	// Notification.show("Value: " + event.getItem());
         	labelNumber.setValue(selectedProducto.getNombre());
-        	labelNumber.setValue(selectedProducto.getCantidad());
-        //	labelName.setValue(Integer.toString(selectedProducto.getCantidad()));
+        	//labelNumber.setValue(selectedProducto.getCantidad());
+        	labelName.setValue(Integer.toString(selectedProducto.getCantidad()));
+        	labelName.setValue(Double.toString(selectedProducto.getPrecioCompra()));
+        	labelName.setValue(Double.toString(selectedProducto.getPrecioVenta()));
+        	labelName.setValue(Double.toString(selectedProducto.getPrecioFabricacion()));
         //	labelType.setValue(selectedProducto.getTipo());
         	
         	
@@ -99,49 +175,97 @@ public class MyUI extends UI {
     	
     	/* FORM */
     	
-    	
-    	FormLayout formLayout = new FormLayout();
-    
-    	TextField textFieldNombre = new TextField("Nombre");
-
-    	TextField textFieldCantidad = new TextField("Cantidad" );
-    	//TextField textFieldType = new TextField("Tipo");
-    	Button buttonAddProc = new Button("Añadir");
-    	//String cantidad = Integer.toString(textFieldCantidad.getValue());
-
+    	//Boton añadir
     	buttonAddProc.addClickListener(e -> {
-    		
-    		Producto p = new Producto(
+    		//Añadir si es nulo, sino es editar
+	    	if(selectedProducto == null) {	
+	    		Producto p = new Producto(
+	    				textFieldNombre.getValue(),
+	    				Integer.parseInt(textFieldCantidad.getValue()),
+	    				(int) (Math.random() * 100) + 1,
+	    				Double.parseDouble(textFieldVenta.getValue()),
+	    				Double.parseDouble(textFieldCompra.getValue()),
+	    				Double.parseDouble(textFieldFabricacion.getValue()),
+	    				
+	    				//textFieldType.getValue()
+	    				);
+	    		
+	    		ListaProductos.getInstance().getLista_productos().add(p);  		
+	    		textFieldNombre.clear();
+	    		textFieldCantidad.clear();
+	    		textFieldVenta.clear();
+				textFieldCompra.clear();
+				textFieldFabricacion.clear();
+	    		//textFieldType.clear();  		
+	    		grid.setItems(ListaProductos.getInstance().getLista_productos());
+	    		
+	    		
+	    		formLayout.addComponents(
+		    			textFieldNombre, 
+		    			textFieldCantidad, 
+		    			textFieldVenta,
+		    			textFieldCompra,
+		    			textFieldFabricacion,
+		    			buttonAddProc
+		    			
+		    	);
+		    	
+		    	horizontalLayout.addComponents(grid, formLayout);
+		    	setContent(horizontalLayout);
+	    		
+	    		Notification.show("Productos totales " + 
+	    				ListaProductos.getInstance().getLista_productos().size() + "!!",
+	    				Notification.TYPE_TRAY_NOTIFICATION);
+    	}else {
+    		//selectedProducto.getId()
+    		/*Iterator<Producto> it = ListaProductos.getInstance().getLista_productos().iterator();
+    		while (it.hasNext()) {
+				Producto aux = it.next();
+				if(aux.getId() == selectedProducto.getId()) {
+					ListaProductos.getInstance().getLista_productos().remove(aux);
+					ListaProductos.getInstance().getLista_productos().add(selectedProducto);
+
+				}
+				
+			}*/
+    		ListaProductos.getInstance().getLista_productos().remove(selectedProducto);
+    		ListaProductos.getInstance().getLista_productos().add(new Producto(
     				textFieldNombre.getValue(),
-    				textFieldCantidad.getValue()
+    				Integer.parseInt(textFieldCantidad.getValue()),
+    				(int) (Math.random() * 100) + 1,
+    				Double.parseDouble(textFieldVenta.getValue()),
+    				Double.parseDouble(textFieldCompra.getValue()),
+    				Double.parseDouble(textFieldFabricacion.getValue())
     				//textFieldType.getValue()
-    				);
+    				));
     		
-    		ListaProductos.getInstance().getLista_productos().add(p);
-    		
+    		selectedProducto= null;
     		textFieldNombre.clear();
     		textFieldCantidad.clear();
-    		//textFieldType.clear();
-    		
+    		textFieldVenta.clear();
+			textFieldCompra.clear();
+			textFieldFabricacion.clear();
+    		//textFieldType.clear();  	
+		//	grid.clearSortOrder();
     		grid.setItems(ListaProductos.getInstance().getLista_productos());
     		
-    		
-    		Notification.show("Productos totales " + 
-    				ListaProductos.getInstance().getLista_productos().size() + "!!",
-    				Notification.TYPE_TRAY_NOTIFICATION);
-    	});	
+    		formLayout.addComponents(
+	    			textFieldNombre, 
+	    			textFieldCantidad, 
+	    			textFieldVenta,
+	    			textFieldCompra,
+	    			textFieldFabricacion,
+	    			buttonAddProc
+	    			
+	    	);
+	    	
+	    	horizontalLayout.addComponents(grid, formLayout);
+	    	setContent(horizontalLayout);
+    	}
+	    	});	
 
-    	formLayout.addComponents(
-    			textFieldNombre, 
-    			textFieldCantidad, 
-    		 
-    			buttonAddProc
-    			
-    	);
-    	
-    	horizontalLayout.addComponents(grid, formLayout);
-    	setContent(horizontalLayout);
-    	
+
+
     	
     }
     	

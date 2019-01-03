@@ -21,7 +21,7 @@ public class ListaProductos {
 	public ArrayList<Producto> getLista_productos() {
 		return lista_productos;
 	}
-	public void setLista_productos(ArrayList<Producto> lista_productoss) {
+	public void setLista_productos(ArrayList<Producto> lista_productos) {
 		this.lista_productos = lista_productos;
 	}	
 }
