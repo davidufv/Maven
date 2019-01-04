@@ -24,4 +24,5 @@ public class ListaProductos {
 	public void setLista_productos(ArrayList<Producto> lista_productos) {
 		this.lista_productos = lista_productos;
 	}	
+	
 }
