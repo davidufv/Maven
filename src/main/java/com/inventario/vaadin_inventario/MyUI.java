@@ -9,8 +9,10 @@ import javax.servlet.annotation.WebServlet;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.converter.StringToIntegerConverter;
+import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.FormLayout;
@@ -41,6 +43,7 @@ public class MyUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
     	
+    	//Campos a rellenar tanto en añadir como editar
     	FormLayout formLayout = new FormLayout();
     	TextField textFieldNombre = new TextField("Nombre");
     	TextField textFieldCantidad = new TextField("Cantidad" );
@@ -58,9 +61,21 @@ public class MyUI extends UI {
 			}
     	multi.setItems(nombres);
     	
- 
+    	
+    	//Campos y botones añadir,borrar
     	//TextField textFieldType = new TextField("Tipo");
     	Button buttonAddProc = new Button("Añadir/Editar");
+    	
+    	//MyUIListBuilder pestaña = new MyUIListBuilder();
+        // Create an opener extension
+        BrowserWindowOpener opener =
+            new BrowserWindowOpener(TablaWeb.class);
+        opener.setFeatures("height=1000px,width=1000px,resizable");
+
+        // Attach it to a button
+        Button button = new Button("Pop It Up");
+        opener.extend(button);
+        
     	//String cantidad = Integer.toString(textFieldCantidad.getValue());
     	Grid<Producto> grid = new Grid<Producto>();
     	HorizontalLayout horizontalLayout = new HorizontalLayout();	
@@ -71,25 +86,31 @@ public class MyUI extends UI {
     			textFieldCompra,
     			textFieldFabricacion,
     			multi,
-    			buttonAddProc
+    			buttonAddProc,
+    			button
     			
     			
     	);
     	horizontalLayout.addComponents(grid, formLayout);
+    	horizontalLayout.setComponentAlignment(formLayout, Alignment.MIDDLE_CENTER);
     	setContent(horizontalLayout);
-    	/* VENTANA DETALLE */
+    	//formLayout.setComponentAlignment( horizontalLayout, Alignment.TOP_CENTER);
     	
+    	
+    	//Ventana que se abre al clicar con los campos correspondientes
     	Window subWindow = new Window("Detalles Producto");
-    	
         VerticalLayout subContent = new VerticalLayout();
         subWindow.setHeight("400px");
         subWindow.setWidth("300px");
-        Label labelNumber = new Label();
-        Label labelName = new Label();
-        Label labelType = new Label();
+        Label labelNombre = new Label();
+        Label labelCantidad = new Label();
+        Label labelVenta = new Label();
+        Label labelCompra = new Label();
+        Label labelFabricacion = new Label();
         Button buttonDelete = new Button("Borrar Producto");
         Button buttonEdit = new Button("Editar Producto");
         
+        //boton borrar
         buttonDelete.addClickListener(e -> {
         	ListaProductos.getInstance().getLista_productos().remove(selectedProducto);
         	grid.setItems(ListaProductos.getInstance().getLista_productos());
@@ -97,7 +118,7 @@ public class MyUI extends UI {
         	removeWindow(subWindow);
         });
         
-        
+        //Boton editar
         buttonEdit.addClickListener(e -> {
         	grid.setItems(ListaProductos.getInstance().getLista_productos());
         	//grid.setItems(Pokedex.getInstance().getPokemons());
@@ -124,20 +145,22 @@ public class MyUI extends UI {
 	    	);
 	    	
 	    	horizontalLayout.addComponents(grid, formLayout);
+	    	horizontalLayout.setComponentAlignment(grid, Alignment.MIDDLE_CENTER);
 	    	setContent(horizontalLayout);
         	
         	
         	removeWindow(subWindow);
         });
    
-              
-        subContent.addComponents(labelNumber, labelName, labelType, buttonDelete,buttonEdit);       
+
+        
+        subContent.addComponents(labelNombre, labelCantidad, labelVenta,labelCompra,labelFabricacion, buttonDelete,buttonEdit);       
         subWindow.center();
         subWindow.setContent(subContent);
         
+    
         
-        
-        // addWindow(subWindow);
+    
     	
     	/* TABLE */
     	//grid.addColumn(propertyName)tt
@@ -158,12 +181,12 @@ public class MyUI extends UI {
     		selectedProducto = event.getItem();
     		
         	// Notification.show("Value: " + event.getItem());
-        	labelNumber.setValue(selectedProducto.getNombre());
+        	labelNombre.setValue(selectedProducto.getNombre());
         	//labelNumber.setValue(selectedProducto.getCantidad());
-        	labelName.setValue(Integer.toString(selectedProducto.getCantidad()));
-        	labelName.setValue(Double.toString(selectedProducto.getPrecioCompra()));
-        	labelName.setValue(Double.toString(selectedProducto.getPrecioVenta()));
-        	labelName.setValue(Double.toString(selectedProducto.getPrecioFabricacion()));
+        	labelCantidad.setValue(Integer.toString(selectedProducto.getCantidad()));
+        	labelCompra.setValue(Double.toString(selectedProducto.getPrecioCompra()));
+        	labelVenta.setValue(Double.toString(selectedProducto.getPrecioVenta()));
+        	labelFabricacion.setValue(Double.toString(selectedProducto.getPrecioFabricacion()));
         //	labelType.setValue(selectedProducto.getTipo());
         	
         	
@@ -185,7 +208,7 @@ public class MyUI extends UI {
 	    				(int) (Math.random() * 100) + 1,
 	    				Double.parseDouble(textFieldVenta.getValue()),
 	    				Double.parseDouble(textFieldCompra.getValue()),
-	    				Double.parseDouble(textFieldFabricacion.getValue()),
+	    				Double.parseDouble(textFieldFabricacion.getValue())
 	    				
 	    				//textFieldType.getValue()
 	    				);
@@ -236,6 +259,7 @@ public class MyUI extends UI {
     				Double.parseDouble(textFieldVenta.getValue()),
     				Double.parseDouble(textFieldCompra.getValue()),
     				Double.parseDouble(textFieldFabricacion.getValue())
+    			
     				//textFieldType.getValue()
     				));
     		

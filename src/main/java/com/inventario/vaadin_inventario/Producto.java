@@ -16,7 +16,7 @@ public class Producto {
 	}
 
 	public Producto(String nombre, Integer cantidad, Integer id, Double precioVenta, Double precioCompra,
-			Double precioFabricacion, ArrayList<Producto> componentes) {
+			Double precioFabricacion) {
 		super();
 		this.nombre = nombre;
 		this.cantidad = cantidad;
@@ -24,7 +24,7 @@ public class Producto {
 		this.precioVenta = precioVenta;
 		this.precioCompra = precioCompra;
 		this.precioFabricacion = precioFabricacion;
-		this.componentes = componentes;
+	//	this.componentes = componentes;
 	}
 	
 	public ArrayList<Producto> getComponentes() {
