@@ -1,8 +1,8 @@
 package com.inventario.vaadin_inventario;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
@@ -10,8 +10,6 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -23,9 +21,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -44,10 +40,13 @@ import com.vaadin.ui.Grid.SelectionMode;
 public class MyUI extends UI {
 
 	private Producto selectedProducto; 
+	private Transaccion selectedTransaccion; 
 	private Double costesFabTotales = 0.0;
     @Override
     protected void init(VaadinRequest vaadinRequest) {
     	
+    	CambioDoblones cambioADoblon = new CambioDoblones();
+    	CambioDracmas cambioADracma = new CambioDracmas();
     	String a = "Palo" ;
     	Integer b = 1 ;
     	Double f = (double) 2;
@@ -60,13 +59,18 @@ public class MyUI extends UI {
     	//Campos a rellenar tanto en añadir como editar
     	FormLayout formLayout = new FormLayout();
     	FormLayout formLayout2 = new FormLayout();
+
     	TextField textFieldNombre = new TextField("Nombre");
     	TextField textFieldCantidad = new TextField("Cantidad" );
     	TextField textFieldFabricacion = new TextField("Precio Fabricación " );
     	TextField textCostesFabricacion = new TextField("Costes Fabricación totales" );
     	TextField textIngreso = new TextField("Nuevo Ingreso Efectivo");
+    	TextField cambio1 = new TextField("Cambio en Dracmas");
+    	TextField cambio2 = new TextField("Cambio en Doblones");
     	Button buttonAddProc = new Button("Añadir/Editar");
     	Button ingreso = new Button("Ingreso efectivo");
+
+
     	
     	//LOGICA CHECKBOX
     	CheckBoxGroup<String> multi =
@@ -86,36 +90,15 @@ public class MyUI extends UI {
 				//precio.add(it.next().getPrecioFabricacion());
 			}
 		textCostesFabricacion.setValue(costesFabTotales.toString());
-		
-		//CODIGO CAMPO INGRESOS
-		
-        //Boton ingreso
-		/*
-        ingreso.addClickListener(e -> {
-        	
-        	Integer auxCantidad = 0;  	
-        	Integer cantidadMas = 0;
-        	auxCantidad = Integer.parseInt(textFieldCantidadMas.getValue());
-        	cantidadMas = selectedProducto.getCantidad() + auxCantidad;
-        	selectedProducto.setCantidad(cantidadMas);
-        	costesFabTotales = cantidadMas * selectedProducto.getPrecioFabricacion();
-        	System.out.println(costesFabTotales);
-    		textCostesFabricacion.setValue(costesFabTotales.toString());
-
-        	textFieldCantidadMas.clear();
-        	grid.setItems(ListaProductos.getInstance().getLista_productos());
-        	//grid.setItems(Pokedex.getInstance().getPokemons());
-        	removeWindow(subWindow);
-        });*/
-        
-    	//String cantidad = Integer.toString(textFieldCantidad.getValue());
-        //Tabla Uno
+		cambio1.setValue(cambioADracma.cambio(costesFabTotales).toString());
+		cambio2.setValue(cambioADoblon.cambio(costesFabTotales).toString());
+        //TablaS
     	Grid<Producto> grid = new Grid<Producto>();
+    	Grid<Transaccion> grid2 = new Grid<Transaccion>();
     	HorizontalLayout horizontalLayout = new HorizontalLayout();	
      	formLayout.addComponents(
     			textFieldNombre, 
     			textFieldCantidad, 
-
     			textFieldFabricacion,
     			multi,
     			buttonAddProc	
@@ -124,18 +107,16 @@ public class MyUI extends UI {
      	formLayout2.addComponents(
      			textCostesFabricacion,
      			textIngreso,
-     			ingreso
+     			ingreso,
+     			cambio1,
+     			cambio2
      			
     			
     	);
-     	
-     	
 
-     	
-     	
-     	
+    		
 
-    	horizontalLayout.addComponents(grid, formLayout,formLayout2);
+    	horizontalLayout.addComponents(grid, formLayout,grid2,formLayout2);
     	//horizontalLayout.setComponentAlignment(formLayout, Alignment.MIDDLE_CENTER);
     	setContent(horizontalLayout);
     	//formLayout.setComponentAlignment( horizontalLayout, Alignment.TOP_CENTER);
@@ -161,6 +142,38 @@ public class MyUI extends UI {
         Button buttonEdit = new Button("Editar Producto");
         Button sumarCantidad = new Button("Sumar Cantidad");
         Button restarCantidad = new Button("Restar Cantidad");
+		
+        
+        //Tabla Cuentas
+        /*
+        tablaCuentas.addClickListener(e -> {
+        		grid2.setItems(ListaTransacciones.getInstance().getListaTransacciones());
+        		
+    	    	
+        		removeWindow(subWindow2);
+        });*/
+        
+        //Boton ingreso
+        ingreso.addClickListener(e -> {
+        		
+        	Double ingresoEfectivo = 0.0;
+        	java.util.Date fecha = new Date();
+        	ingresoEfectivo = Double.parseDouble(textIngreso.getValue());
+        	//System.out.println(ingresoEfectivo);
+        	costesFabTotales = costesFabTotales - ingresoEfectivo;
+        	textCostesFabricacion.setValue(costesFabTotales.toString());
+        	cambio1.setValue(cambioADracma.cambio(costesFabTotales).toString());
+    		cambio2.setValue(cambioADoblon.cambio(costesFabTotales).toString());
+    		textIngreso.clear();
+    		Transaccion nuevaT = new Transaccion(
+    				ingresoEfectivo,
+    				(int) (Math.random() * 100) + 1,
+    				fecha
+    				);
+    		ListaTransacciones.getInstance().getListaTransacciones().add(nuevaT);
+    		grid2.setItems(ListaTransacciones.getInstance().getListaTransacciones());
+        	//removeWindow(subWindow);
+        });
         
         //Boton Sumar
         sumarCantidad.addClickListener(e -> {
@@ -171,9 +184,10 @@ public class MyUI extends UI {
         	cantidadMas = selectedProducto.getCantidad() + auxCantidad;
         	selectedProducto.setCantidad(cantidadMas);
         	costesFabTotales = cantidadMas * selectedProducto.getPrecioFabricacion();
-        	System.out.println(costesFabTotales);
+        	//System.out.println(costesFabTotales);
     		textCostesFabricacion.setValue(costesFabTotales.toString());
-
+    		cambio1.setValue(cambioADracma.cambio(costesFabTotales).toString());
+    		cambio2.setValue(cambioADoblon.cambio(costesFabTotales).toString());
         	textFieldCantidadMas.clear();
         	grid.setItems(ListaProductos.getInstance().getLista_productos());
         	//grid.setItems(Pokedex.getInstance().getPokemons());
@@ -246,11 +260,12 @@ public class MyUI extends UI {
 
         horizontalLayout2.addComponents(subContent,subContent2);
     	//setContent(horizontalLayout);
-
+       // horizontalLayout3.addComponents(grid2);
         subContent.addComponents(labelNombre, labelCantidad,labelFabricacion, 
         		buttonDelete,buttonEdit);  
         subContent2.addComponents(textFieldCantidadMas,sumarCantidad,textFieldCantidadMenos,restarCantidad);
         subWindow.center();
+       // tablaCuentas
         subWindow.setContent(horizontalLayout2);
     
     
@@ -265,7 +280,6 @@ public class MyUI extends UI {
     	grid.addColumn(Producto::getNombre).setCaption("Nombre");
     	grid.addColumn(Producto::getCantidad).setCaption("Cantidad");
     	grid.addColumn(Producto::getPrecioFabricacion).setCaption("Fabricacion");
-    	//grid.addColumn(Mueble::getTipo).setCaption("Tipo");
     	grid.setSelectionMode(SelectionMode.SINGLE);
 		grid.setItems(ListaProductos.getInstance().getLista_productos());
 
@@ -275,17 +289,21 @@ public class MyUI extends UI {
     		
         	// Notification.show("Value: " + event.getItem());
         	labelNombre.setValue(selectedProducto.getNombre());
-        	//labelNumber.setValue(selectedProducto.getCantidad());
         	labelCantidad.setValue(Integer.toString(selectedProducto.getCantidad()));
         	labelFabricacion.setValue(Double.toString(selectedProducto.getPrecioFabricacion()));
-        //	labelType.setValue(selectedProducto.getTipo());
-        	
-        	
         	removeWindow(subWindow);
         	addWindow(subWindow);
         	
     	});
+    	
+    	grid2.addColumn(Transaccion::getCantidadT).setCaption("Cantidad");
+    	grid2.addColumn(Transaccion::getFecha).setCaption("FechaTran");
+    	grid2.addColumn(Transaccion::getCodigo).setCaption("Codigo");
+    	grid2.setSelectionMode(SelectionMode.SINGLE);
+		grid2.setItems(ListaTransacciones.getInstance().getListaTransacciones());
+		
 
+    	
     	/* FORM */
     	
     	//BOTON AÑADIR!!!!!!!! // Editar
@@ -331,7 +349,7 @@ public class MyUI extends UI {
 	    		Producto p = new Producto(
 	    				textFieldNombre.getValue(),
 	    				Integer.parseInt(textFieldCantidad.getValue()),
-	    				//Double.parseDouble(textFieldFabricacion.getValue()),
+
 	    				precioTotal,
 	    				componentesProc
 	    				

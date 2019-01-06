@@ -5,9 +5,6 @@ import java.util.ArrayList;
 public class Producto {
 	private String nombre;
 	private Integer cantidad;
-
-
-
 	private Double precioFabricacion;
 	private ArrayList<Producto> componentes;
 	public Producto() {
